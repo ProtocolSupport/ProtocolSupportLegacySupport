@@ -1,0 +1,6 @@
+name: ProtocolSupportLegacySupport
+main: protocolsupportlegacysupport.ProtocolSupportLegacySupport
+version: 1.0
+author: _Shevchik_
+load: STARTUP
+depend: [ProtocolSupport, ProtocolLib]
