@@ -1,26 +1,20 @@
 package protocolsupportlegacysupport.utils;
 
-import org.bukkit.entity.EntityType;
-
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Registry;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Serializer;
 
 public class Constants {
 
 	public static final int WITHER_SKULL_TYPE_ID = 66;
-	@SuppressWarnings("deprecation")
-	public static final int SLIME_TYPE_ID = EntityType.SLIME.getTypeId();
-	@SuppressWarnings("deprecation")
-	public static final int HORSE_TYPE_ID = EntityType.HORSE.getTypeId();
-	@SuppressWarnings("deprecation")
-	public static final int WITHER_TYPE_ID = EntityType.WITHER.getTypeId();
-	@SuppressWarnings("deprecation")
-	public static final int ARMORSTAND_LIVING_TYPE_ID = EntityType.ARMOR_STAND.getTypeId();
+	public static final int SLIME_TYPE_ID = 64;
+	public static final int HORSE_TYPE_ID = 29;
+	public static final int WITHER_TYPE_ID = 83;
+	public static final int ARMORSTAND_LIVING_TYPE_ID = 1;
 	public static final int ARMORSTAND_OBJECT_TYPE_ID = 78;
 
 	public static final Serializer DW_FLOAT_SERIALIZER = Registry.get(Float.class, false);
 	public static final Serializer DW_BYTE_SERIALIZER = Registry.get(Byte.class, false);
-	public static final Serializer DW_STRING_SERIALIZER = Registry.get(String.class, false);
+	public static final Serializer DW_OPTIONAL_CHAT_SERIALIZER = Registry.getChatComponentSerializer(true);
 	public static final Serializer DW_BOOLEAN_SERIALIZER = Registry.get(Boolean.class, false);
 	public static final Serializer DW_INTEGER_SERIALIZER = Registry.get(Integer.class, false);
 	public static final int DW_NAME_VISIBLE_INDEX = 3;

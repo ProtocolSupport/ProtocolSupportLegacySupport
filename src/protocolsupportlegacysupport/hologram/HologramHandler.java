@@ -11,6 +11,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 
 import protocolsupport.api.Connection;
+import protocolsupport.api.Connection.PacketListener;
 import protocolsupport.api.ProtocolSupportAPI;
 import protocolsupport.api.ProtocolType;
 import protocolsupport.api.ProtocolVersion;
@@ -36,57 +37,58 @@ public class HologramHandler implements Listener {
 
 	private void initConnection(Connection connection) {
 		connection.addMetadata(metadata_key, new ArmorStandTracker());
-		connection.addPacketSendListener(packetObj -> {
-			if (connection.getVersion().getProtocolType() != ProtocolType.PC) {
-				return true;
-			}
-			if (connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_7_10)) {
-				return true;
-			}
-			PacketContainer packet = PacketContainer.fromPacket(packetObj);
-			if (packet.getType() == PacketType.Play.Server.SPAWN_ENTITY) {
-				if (packet.getIntegers().read(6) != Constants.ARMORSTAND_OBJECT_TYPE_ID) {
-					return true;
+		connection.addPacketListener(new PacketListener() {
+			@Override
+			public void onPacketSending(PacketEvent event) {
+				if (
+					(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
+					connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_7_10)
+				) {
+					return;
 				}
-				initArmorStand(connection, packet.getIntegers().read(0), packet.getDoubles());
-				return false;
-			} else if (packet.getType() == PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
-				if (packet.getIntegers().read(1) != Constants.ARMORSTAND_LIVING_TYPE_ID) {
-					return true;
-				}
-				int entityId = packet.getIntegers().read(0);
-				initArmorStand(connection, entityId, packet.getDoubles());
-				ArmorStandData data = getArmorStand(connection, entityId);
-				data.addMeta(packet.getDataWatcherModifier().read(0));
-				return false;
-			} else if (packet.getType() == PacketType.Play.Server.ENTITY_DESTROY) {
-				int entityIds[] = packet.getIntegerArrays().read(0);
-				for (int entityId : entityIds) {
-					ArmorStandData data = getArmorStand(connection, entityId);
-					if (data == null) {
-						continue;
+				PacketContainer packet = PacketContainer.fromPacket(event.getPacket());
+				if (packet.getType() == PacketType.Play.Server.SPAWN_ENTITY) {
+					if (packet.getIntegers().read(6) != Constants.ARMORSTAND_OBJECT_TYPE_ID) {
+						return;
 					}
-					data.destroy();
-					getTracker(connection).removeArmorStand(entityId);
+					event.setCancelled(true);
+					initArmorStand(connection, packet.getIntegers().read(0), packet.getDoubles());
+				} else if (packet.getType() == PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
+					if (packet.getIntegers().read(1) != Constants.ARMORSTAND_LIVING_TYPE_ID) {
+						return;
+					}
+					event.setCancelled(true);
+					int entityId = packet.getIntegers().read(0);
+					initArmorStand(connection, entityId, packet.getDoubles());
+					ArmorStandData data = getArmorStand(connection, entityId);
+					data.addMeta(packet.getDataWatcherModifier().read(0));
+				} else if (packet.getType() == PacketType.Play.Server.ENTITY_DESTROY) {
+					int[] entityIds = packet.getIntegerArrays().read(0);
+					for (int entityId : entityIds) {
+						ArmorStandData data = getArmorStand(connection, entityId);
+						if (data == null) {
+							continue;
+						}
+						data.destroy();
+						getTracker(connection).removeArmorStand(entityId);
+					}
+				} else if (packet.getType() == PacketType.Play.Server.ENTITY_METADATA) {
+					ArmorStandData data = getArmorStand(connection, packet.getIntegers().read(0));
+					if (data == null) {
+						return;
+					}
+					event.setCancelled(true);
+					data.addMeta(packet.getWatchableCollectionModifier().read(0));
+				} else if (packet.getType() == PacketType.Play.Server.ENTITY_TELEPORT) {
+					ArmorStandData data = getArmorStand(connection, packet.getIntegers().read(0));
+					if (data == null) {
+						return;
+					}
+					event.setCancelled(true);
+					StructureModifier<Double> doubles = packet.getDoubles();
+					data.setLocation(new Vector(doubles.read(0), doubles.read(1), doubles.read(2)));
 				}
-				return true;
-			} else if (packet.getType() == PacketType.Play.Server.ENTITY_METADATA) {
-				ArmorStandData data = getArmorStand(connection, packet.getIntegers().read(0));
-				if (data == null) {
-					return true;
-				}
-				data.addMeta(packet.getWatchableCollectionModifier().read(0));
-				return false;
-			} else if (packet.getType() == PacketType.Play.Server.ENTITY_TELEPORT) {
-				ArmorStandData data = getArmorStand(connection, packet.getIntegers().read(0));
-				if (data == null) {
-					return true;
-				}
-				StructureModifier<Double> doubles = packet.getDoubles();
-				data.setLocation(new Vector(doubles.read(0), doubles.read(1), doubles.read(2)));
-				return false;
 			}
-			return true;
 		});
 	}
 

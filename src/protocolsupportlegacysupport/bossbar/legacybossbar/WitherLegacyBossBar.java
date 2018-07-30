@@ -1,10 +1,13 @@
 package protocolsupportlegacysupport.bossbar.legacybossbar;
 
+import java.util.Optional;
+
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.WrappedDataWatcherObject;
 
@@ -18,18 +21,18 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 	private final int id = IdGenerator.generateId();
 
 	private Location lastPlayerLocation;
-	private String lastName = "";
+	private WrappedChatComponent lastName = WrappedChatComponent.fromText("");
 	private float lastPercent = 100.0F;
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void spawn(Connection connection, Player player, String name, float percent) {
+	public void spawn(Connection connection, Player player, WrappedChatComponent name, float percent) {
 		lastName = name;
 		lastPercent = percent;
 		lastPlayerLocation = player.getLocation();
 		WrappedDataWatcher watcher = new WrappedDataWatcher();
 		watcher.setObject(new WrappedDataWatcherObject(0, Constants.DW_BYTE_SERIALIZER), Byte.valueOf((byte) 0x20));
-		watcher.setObject(new WrappedDataWatcherObject(2, Constants.DW_STRING_SERIALIZER), lastName);
+		watcher.setObject(new WrappedDataWatcherObject(2, Constants.DW_OPTIONAL_CHAT_SERIALIZER), Optional.of(lastName));
 		watcher.setObject(new WrappedDataWatcherObject(3, Constants.DW_BOOLEAN_SERIALIZER), Boolean.TRUE);
 		watcher.setObject(new WrappedDataWatcherObject(6, Constants.DW_FLOAT_SERIALIZER), Float.valueOf(lastPercent * 3F));
 		watcher.setObject(new WrappedDataWatcherObject(14, Constants.DW_INTEGER_SERIALIZER), Integer.valueOf(881));
@@ -58,7 +61,7 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 	}
 
 	@Override
-	public void updateName(Connection connection, Player player, String name) {
+	public void updateName(Connection connection, Player player, WrappedChatComponent name) {
 		despawn(connection);
 		spawn(connection, player, name, lastPercent);
 	}
@@ -71,7 +74,7 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 
 	@Override
 	public void despawn(Connection connection) {
-		PacketUtils.sendPacket(connection, PacketUtils.createEntityDestroyPacket(new int[] {id}));
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityDestroyPacket(id));
 		lastPlayerLocation = null;
 	}
 

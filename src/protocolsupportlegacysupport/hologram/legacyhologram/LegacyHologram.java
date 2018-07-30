@@ -1,6 +1,10 @@
 package protocolsupportlegacysupport.hologram.legacyhologram;
 
+import java.util.Optional;
+
 import org.bukkit.util.Vector;
+
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
 import protocolsupport.api.ProtocolVersion;
@@ -17,11 +21,11 @@ public interface LegacyHologram {
 		}
 	}
 
-	public void spawn(Connection connection, Vector location, String name);
+	public void spawn(Connection connection, Vector location, Optional<WrappedChatComponent> name);
 
 	public void updateLocation(Connection connection, Vector location);
 
-	public void updateName(Connection connection, String name);
+	public void updateName(Connection connection, Optional<WrappedChatComponent> name);
 
 	public void despawn(Connection connection);
 

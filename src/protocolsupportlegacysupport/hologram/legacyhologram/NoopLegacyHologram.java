@@ -1,6 +1,10 @@
 package protocolsupportlegacysupport.hologram.legacyhologram;
 
+import java.util.Optional;
+
 import org.bukkit.util.Vector;
+
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
 
@@ -8,7 +12,7 @@ import protocolsupport.api.Connection;
 public class NoopLegacyHologram implements LegacyHologram {
 
 	@Override
-	public void spawn(Connection player, Vector location, String name) {
+	public void spawn(Connection player, Vector location, Optional<WrappedChatComponent> name) {
 	}
 
 	@Override
@@ -16,7 +20,7 @@ public class NoopLegacyHologram implements LegacyHologram {
 	}
 
 	@Override
-	public void updateName(Connection player, String name) {
+	public void updateName(Connection player, Optional<WrappedChatComponent> name) {
 	}
 
 	@Override

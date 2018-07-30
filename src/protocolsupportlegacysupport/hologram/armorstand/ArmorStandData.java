@@ -2,9 +2,11 @@ package protocolsupportlegacysupport.hologram.armorstand;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.bukkit.util.Vector;
 
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
@@ -57,8 +59,9 @@ public class ArmorStandData {
 		return (value & offset) == offset;
 	}
 
-	private String getName() {
-		return (String) meta.get(Constants.DW_NAME_INDEX);
+	@SuppressWarnings("unchecked")
+	private Optional<WrappedChatComponent> getName() {
+		return (Optional<WrappedChatComponent>) meta.get(Constants.DW_NAME_INDEX);
 	}
 
 	private boolean isHologram() {
@@ -74,19 +77,7 @@ public class ArmorStandData {
 		if (armorStandData == null) {
 			return false;
 		}
-		int armorStandDataI = ((Number) armorStandData).intValue();
-		if (!isOffsetSet(armorStandDataI, Constants.DW_ARMORSTANDDATA_MARKER_OFFSET)) {
-			return false;
-		}
-		Object nameVisible = meta.get(Constants.DW_NAME_VISIBLE_INDEX);
-		if (nameVisible == null) {
-			return false;
-		}
-		if (!(boolean)nameVisible) {
-			return false;
-		}
-		Object name = meta.get(Constants.DW_NAME_INDEX);
-		return name != null;
+		return isOffsetSet(((Number) armorStandData).intValue(), Constants.DW_ARMORSTANDDATA_MARKER_OFFSET);
 	}
 
 	public void destroy() {

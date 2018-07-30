@@ -10,10 +10,10 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 
 import protocolsupport.api.Connection;
+import protocolsupport.api.Connection.PacketListener;
 import protocolsupport.api.ProtocolSupportAPI;
 import protocolsupport.api.ProtocolType;
 import protocolsupport.api.ProtocolVersion;
-import protocolsupport.api.chat.ChatAPI;
 import protocolsupport.api.events.ConnectionOpenEvent;
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
 import protocolsupportlegacysupport.bossbar.legacybossbar.LegacyBossBar;
@@ -46,57 +46,55 @@ public class BossBarHandler implements Listener {
 	}
 
 	private void initConnection(Connection connection) {
-		connection.addPacketSendListener(packetObj -> {
-			if (connection.getVersion().getProtocolType() != ProtocolType.PC) {
-				return true;
-			}
-			if (connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_8)) {
-				return true;
-			}
-			Player player = connection.getPlayer();
-			if (player == null) {
-				return true;
-			}
-			PacketContainer packet = PacketContainer.fromPacket(packetObj);
-			if (packet.getType() != PacketType.Play.Server.BOSS) {
-				return true;
-			}
-			int action = packet.getSpecificModifier(Enum.class).read(0).ordinal();
-			switch (action) {
-				case 0: {
-					LegacyBossBar bossbar = LegacyBossBar.create(connection.getVersion());
-					bossbar.spawn(
-						connection, player,
-						ChatAPI.fromJSON(packet.getChatComponents().read(0).getJson()).toLegacyText(),
-						packet.getFloat().read(0) * 100
-					);
-					connection.addMetadata(metadata_key, bossbar);
-					break;
+		connection.addPacketListener(new PacketListener() {
+			@Override
+			public void onPacketSending(PacketEvent event) {
+				if (
+					(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
+					connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_8)
+				) {
+					return;
 				}
-				case 1: {
-					LegacyBossBar bossbar = getBossBar(connection);
-					if (bossbar != null) {
-						bossbar.despawn(connection);
-						connection.removeMetadata(metadata_key);
+				Player player = connection.getPlayer();
+				if (player == null) {
+					return;
+				}
+				PacketContainer packet = PacketContainer.fromPacket(event.getPacket());
+				if (packet.getType() != PacketType.Play.Server.BOSS) {
+					return;
+				}
+				int action = packet.getSpecificModifier(Enum.class).read(0).ordinal();
+				switch (action) {
+					case 0: {
+						LegacyBossBar bossbar = LegacyBossBar.create(connection.getVersion());
+						bossbar.spawn(connection, player, packet.getChatComponents().read(0), packet.getFloat().read(0) * 100);
+						connection.addMetadata(metadata_key, bossbar);
+						break;
 					}
-					break;
-				}
-				case 2: {
-					LegacyBossBar bossbar = getBossBar(connection);
-					if (bossbar != null) {
-						bossbar.updatePercent(connection, player, packet.getFloat().read(0) * 100);
+					case 1: {
+						LegacyBossBar bossbar = getBossBar(connection);
+						if (bossbar != null) {
+							bossbar.despawn(connection);
+							connection.removeMetadata(metadata_key);
+						}
+						break;
 					}
-					break;
-				}
-				case 3: {
-					LegacyBossBar bossbar = getBossBar(connection);
-					if (bossbar != null) {
-						bossbar.updateName(connection, player, ChatAPI.fromJSON(packet.getChatComponents().read(0).getJson()).toLegacyText());
+					case 2: {
+						LegacyBossBar bossbar = getBossBar(connection);
+						if (bossbar != null) {
+							bossbar.updatePercent(connection, player, packet.getFloat().read(0) * 100);
+						}
+						break;
 					}
-					break;
+					case 3: {
+						LegacyBossBar bossbar = getBossBar(connection);
+						if (bossbar != null) {
+							bossbar.updateName(connection, player, packet.getChatComponents().read(0));
+						}
+						break;
+					}
 				}
 			}
-			return false;
 		});
 	}
 
