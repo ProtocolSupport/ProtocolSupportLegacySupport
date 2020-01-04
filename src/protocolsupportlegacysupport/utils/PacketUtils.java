@@ -3,18 +3,24 @@ package protocolsupportlegacysupport.utils;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher.Serializer;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher.WrappedDataWatcherObject;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
 import protocolsupport.api.Connection;
 
 public class PacketUtils {
+
+	public static WrappedWatchableObject createDataWatcherObject(int index, Serializer serializer, Object value) {
+		return new WrappedWatchableObject(new WrappedDataWatcherObject(index, serializer), value);
+	}
 
 	private static final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 
@@ -48,19 +54,18 @@ public class PacketUtils {
 		return destroy;
 	}
 
-	public static PacketContainer createEntityLivingSpawnPacket(int entityId, int type, WrappedDataWatcher dw) {
+	public static PacketContainer createEntityLivingSpawnPacket(int entityId, int type) {
 		PacketContainer spawn = createPacket(PacketType.Play.Server.SPAWN_ENTITY_LIVING);
 		spawn.getIntegers().write(0, entityId);
 		spawn.getIntegers().write(1, type);
-		spawn.getDataWatcherModifier().write(0, dw);
 		spawn.getSpecificModifier(UUID.class).write(0, UUID.randomUUID());
 		return spawn;
 	}
 
-	public static PacketContainer createEntityObjectSpawnPacket(int entityId, int type) {
+	public static PacketContainer createEntityObjectSpawnPacket(int entityId, EntityType type) {
 		PacketContainer spawn = createPacket(PacketType.Play.Server.SPAWN_ENTITY);
 		spawn.getIntegers().write(0, entityId);
-		spawn.getIntegers().write(6, type);
+		spawn.getEntityTypeModifier().write(0, type);
 		spawn.getSpecificModifier(UUID.class).write(0, UUID.randomUUID());
 		return spawn;
 	}

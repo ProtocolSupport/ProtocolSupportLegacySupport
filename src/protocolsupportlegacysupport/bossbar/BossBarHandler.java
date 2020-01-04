@@ -31,7 +31,7 @@ public class BossBarHandler implements Listener {
 				if (player == null) {
 					return;
 				}
-				LegacyBossBar bossbar = getBossBar(connection);
+				LegacyBossBar bossbar = connection.getMetadata(metadata_key);
 				if (bossbar == null) {
 					return;
 				}
@@ -72,7 +72,7 @@ public class BossBarHandler implements Listener {
 						break;
 					}
 					case 1: {
-						LegacyBossBar bossbar = getBossBar(connection);
+						LegacyBossBar bossbar = connection.getMetadata(metadata_key);
 						if (bossbar != null) {
 							bossbar.despawn(connection);
 							connection.removeMetadata(metadata_key);
@@ -80,14 +80,14 @@ public class BossBarHandler implements Listener {
 						break;
 					}
 					case 2: {
-						LegacyBossBar bossbar = getBossBar(connection);
+						LegacyBossBar bossbar = connection.getMetadata(metadata_key);
 						if (bossbar != null) {
 							bossbar.updatePercent(connection, player, packet.getFloat().read(0) * 100);
 						}
 						break;
 					}
 					case 3: {
-						LegacyBossBar bossbar = getBossBar(connection);
+						LegacyBossBar bossbar = connection.getMetadata(metadata_key);
 						if (bossbar != null) {
 							bossbar.updateName(connection, player, packet.getChatComponents().read(0));
 						}
@@ -96,10 +96,6 @@ public class BossBarHandler implements Listener {
 				}
 			}
 		});
-	}
-
-	private LegacyBossBar getBossBar(Connection connection) {
-		return ((LegacyBossBar) connection.getMetadata(metadata_key));
 	}
 
 }

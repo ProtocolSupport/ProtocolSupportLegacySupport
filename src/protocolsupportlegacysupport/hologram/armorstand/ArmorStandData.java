@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
 import protocolsupport.api.Connection;
@@ -35,10 +34,6 @@ public class ArmorStandData {
 		}
 	}
 
-	public void addMeta(WrappedDataWatcher watcher) {
-		addMeta(watcher.getWatchableObjects());
-	}
-
 	public void addMeta(Collection<WrappedWatchableObject> objects) {
 		for (WrappedWatchableObject obj : objects) {
 			meta.put(obj.getIndex(), obj.getRawValue());
@@ -61,16 +56,16 @@ public class ArmorStandData {
 
 	@SuppressWarnings("unchecked")
 	private Optional<WrappedChatComponent> getName() {
-		return (Optional<WrappedChatComponent>) meta.get(Constants.DW_NAME_INDEX);
+		return ((Optional<Object>) meta.get(Constants.DW_BASE_NAME_INDEX)).map(WrappedChatComponent::fromHandle);
 	}
 
 	private boolean isHologram() {
-		Object basicData = meta.get(Constants.DW_BASICDATA_INDEX);
+		Object basicData = meta.get(Constants.DW_BASE_FLAGS_INDEX);
 		if (basicData == null) {
 			return false;
 		}
 		int basicDataI = ((Number) basicData).intValue();
-		if (!isOffsetSet(basicDataI, Constants.DW_BASICADATA_INVISIBLE_OFFSET)) {
+		if (!isOffsetSet(basicDataI, Constants.DW_BASE_FLAGS_INVISIBLE_OFFSET)) {
 			return false;
 		}
 		Object armorStandData = meta.get(Constants.DW_ARMORSTANDDATA_INDEX);

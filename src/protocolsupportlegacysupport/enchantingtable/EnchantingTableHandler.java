@@ -33,7 +33,7 @@ public class EnchantingTableHandler implements Listener {
 			ItemStack[] contents = player.getInventory().getStorageContents();
 			for (int i = 0; i < contents.length; i++) {
 				ItemStack itemstack = contents[i];
-				if (itemstack.getType() == Material.LAPIS_LAZULI) {
+				if (itemstack != null && itemstack.getType() == Material.LAPIS_LAZULI) {
 					int lapisPlayerAmount = Math.min(itemstack.getAmount(), Material.LAPIS_LAZULI.getMaxStackSize() - lapisEnchAmount);
 					itemstack.setAmount(itemstack.getAmount() - lapisPlayerAmount);
 					if (itemstack.getAmount() == 0) {

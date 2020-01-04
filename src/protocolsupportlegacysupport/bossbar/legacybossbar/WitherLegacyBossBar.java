@@ -1,15 +1,14 @@
 package protocolsupportlegacysupport.bossbar.legacybossbar;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher.WrappedDataWatcherObject;
 
 import protocolsupport.api.Connection;
 import protocolsupportlegacysupport.utils.Constants;
@@ -18,25 +17,29 @@ import protocolsupportlegacysupport.utils.PacketUtils;
 
 public class WitherLegacyBossBar implements LegacyBossBar {
 
+	private static final Byte WITHER_BASE_FLAGS_VALUE = Byte.valueOf((byte) 0x20);
+	private static final Integer WITHER_INVULNERABLE_TIME = Integer.valueOf(881);
+
 	private final int id = IdGenerator.generateId();
 
 	private Location lastPlayerLocation;
 	private WrappedChatComponent lastName = WrappedChatComponent.fromText("");
 	private float lastPercent = 100.0F;
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void spawn(Connection connection, Player player, WrappedChatComponent name, float percent) {
 		lastName = name;
 		lastPercent = percent;
 		lastPlayerLocation = player.getLocation();
-		WrappedDataWatcher watcher = new WrappedDataWatcher();
-		watcher.setObject(new WrappedDataWatcherObject(0, Constants.DW_BYTE_SERIALIZER), Byte.valueOf((byte) 0x20));
-		watcher.setObject(new WrappedDataWatcherObject(2, Constants.DW_OPTIONAL_CHAT_SERIALIZER), Optional.of(lastName));
-		watcher.setObject(new WrappedDataWatcherObject(3, Constants.DW_BOOLEAN_SERIALIZER), Boolean.TRUE);
-		watcher.setObject(new WrappedDataWatcherObject(6, Constants.DW_FLOAT_SERIALIZER), Float.valueOf(lastPercent * 3F));
-		watcher.setObject(new WrappedDataWatcherObject(14, Constants.DW_INTEGER_SERIALIZER), Integer.valueOf(881));
-		PacketUtils.sendPacket(connection, PacketUtils.createEntityLivingSpawnPacket(id, EntityType.WITHER.getTypeId(), watcher));
+
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityLivingSpawnPacket(id, Constants.WITHER_TYPE_ID));
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityMetadataPacket(id, Arrays.asList(
+			PacketUtils.createDataWatcherObject(Constants.DW_BASE_FLAGS_INDEX, Constants.DW_BYTE_SERIALIZER, WITHER_BASE_FLAGS_VALUE),
+			PacketUtils.createDataWatcherObject(Constants.DW_BASE_NAME_INDEX, Constants.DW_OPTIONAL_CHAT_SERIALIZER, Optional.of(lastName.getHandle())),
+			PacketUtils.createDataWatcherObject(Constants.DW_BASE_NAME_VISIBLE_INDEX, Constants.DW_BOOLEAN_SERIALIZER, Boolean.TRUE),
+			PacketUtils.createDataWatcherObject(Constants.DW_LIVING_HEALTH_INDEX, Constants.DW_FLOAT_SERIALIZER, Float.valueOf(lastPercent * 3F)),
+			PacketUtils.createDataWatcherObject(Constants.DW_WITHER_INVULNERABLE_TIME_INDEX, Constants.DW_INTEGER_SERIALIZER, WITHER_INVULNERABLE_TIME)
+		)));
 		updateEntityLocation(connection);
 	}
 
@@ -68,8 +71,11 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 
 	@Override
 	public void updatePercent(Connection connection, Player player, float percent) {
-		despawn(connection);
-		spawn(connection, player, lastName, percent);
+		lastPercent = percent;
+
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityMetadataPacket(id, Collections.singletonList(
+			PacketUtils.createDataWatcherObject(Constants.DW_LIVING_HEALTH_INDEX, Constants.DW_FLOAT_SERIALIZER, Float.valueOf(lastPercent * 3F))
+		)));
 	}
 
 	@Override

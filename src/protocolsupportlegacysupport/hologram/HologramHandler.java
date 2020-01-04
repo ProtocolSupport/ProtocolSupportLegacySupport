@@ -1,6 +1,7 @@
 package protocolsupportlegacysupport.hologram;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -48,7 +49,7 @@ public class HologramHandler implements Listener {
 				}
 				PacketContainer packet = PacketContainer.fromPacket(event.getPacket());
 				if (packet.getType() == PacketType.Play.Server.SPAWN_ENTITY) {
-					if (packet.getIntegers().read(6) != Constants.ARMORSTAND_OBJECT_TYPE_ID) {
+					if (packet.getEntityTypeModifier().read(0) != EntityType.ARMOR_STAND) {
 						return;
 					}
 					event.setCancelled(true);
@@ -60,8 +61,6 @@ public class HologramHandler implements Listener {
 					event.setCancelled(true);
 					int entityId = packet.getIntegers().read(0);
 					initArmorStand(connection, entityId, packet.getDoubles());
-					ArmorStandData data = getArmorStand(connection, entityId);
-					data.addMeta(packet.getDataWatcherModifier().read(0));
 				} else if (packet.getType() == PacketType.Play.Server.ENTITY_DESTROY) {
 					int[] entityIds = packet.getIntegerArrays().read(0);
 					for (int entityId : entityIds) {
@@ -93,7 +92,7 @@ public class HologramHandler implements Listener {
 	}
 
 	protected ArmorStandTracker getTracker(Connection connection) {
-		return ((ArmorStandTracker) connection.getMetadata(metadata_key));
+		return connection.getMetadata(metadata_key);
 	}
 
 	protected ArmorStandData getArmorStand(Connection connection, int entityId) {
