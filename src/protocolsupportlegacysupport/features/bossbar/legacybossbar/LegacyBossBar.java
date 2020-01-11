@@ -1,4 +1,4 @@
-package protocolsupportlegacysupport.bossbar.legacybossbar;
+package protocolsupportlegacysupport.features.bossbar.legacybossbar;
 
 import org.bukkit.entity.Player;
 

@@ -1,4 +1,4 @@
-package protocolsupportlegacysupport.brewingstandfuel;
+package protocolsupportlegacysupport.features.brewingstandfuel;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -7,6 +7,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -14,15 +15,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
+import protocolsupportlegacysupport.features.AbstractFeature;
 
-public class BrewingStandFuelHandler implements Listener {
+public class BrewingStandFuelHandler extends AbstractFeature<Void> implements Listener {
 
-	public void start() {
+	@Override
+	protected void enable0(Void config) {
 		Bukkit.getPluginManager().registerEvents(this, ProtocolSupportLegacySupport.getInstance());
 	}
 
+	@Override
+	protected void disable0() {
+		HandlerList.unregisterAll(this);
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onBrewingClick(PlayerInteractEvent event) {
+	protected void onBrewingClick(PlayerInteractEvent event) {
 		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
 			return;
 		}

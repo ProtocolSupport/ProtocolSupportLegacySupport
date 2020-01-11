@@ -1,10 +1,12 @@
-package protocolsupportlegacysupport.bossbar;
+package protocolsupportlegacysupport.features.bossbar;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
@@ -16,16 +18,18 @@ import protocolsupport.api.ProtocolType;
 import protocolsupport.api.ProtocolVersion;
 import protocolsupport.api.events.ConnectionOpenEvent;
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
-import protocolsupportlegacysupport.bossbar.legacybossbar.LegacyBossBar;
+import protocolsupportlegacysupport.features.AbstractFeature;
+import protocolsupportlegacysupport.features.bossbar.legacybossbar.LegacyBossBar;
 
-public class BossBarHandler implements Listener {
+public class BossBarHandler extends AbstractFeature<Void> implements Listener {
 
-	private static final String metadata_key = "PSLS_BOSSBAR";
+	private BukkitTask task;
 
-	public void start() {
+	@Override
+	protected void enable0(Void config) {
 		Bukkit.getPluginManager().registerEvents(this, ProtocolSupportLegacySupport.getInstance());
 		ProtocolSupportAPI.getConnections().forEach(this::initConnection);
-		Bukkit.getScheduler().runTaskTimer(ProtocolSupportLegacySupport.getInstance(), () -> {
+		task = Bukkit.getScheduler().runTaskTimer(ProtocolSupportLegacySupport.getInstance(), () -> {
 			ProtocolSupportAPI.getConnections().forEach(connection -> {
 				Player player = connection.getPlayer();
 				if (player == null) {
@@ -40,8 +44,22 @@ public class BossBarHandler implements Listener {
 		}, 0, 1);
 	}
 
+	@Override
+	protected void disable0() {
+		HandlerList.unregisterAll();
+		task.cancel();
+		for (Connection connection : ProtocolSupportAPI.getConnections()) {
+			LegacyBossBar bossbar = connection.removeMetadata(metadata_key);
+			if (bossbar != null) {
+				bossbar.despawn(connection);
+			}
+		}
+	}
+
+	private static final String metadata_key = "PSLS_BOSSBAR";
+
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onConnectionOpen(ConnectionOpenEvent event) {
+	protected void onConnectionOpen(ConnectionOpenEvent event) {
 		initConnection(event.getConnection());
 	}
 
@@ -72,10 +90,9 @@ public class BossBarHandler implements Listener {
 						break;
 					}
 					case 1: {
-						LegacyBossBar bossbar = connection.getMetadata(metadata_key);
+						LegacyBossBar bossbar = connection.removeMetadata(metadata_key);
 						if (bossbar != null) {
 							bossbar.despawn(connection);
-							connection.removeMetadata(metadata_key);
 						}
 						break;
 					}

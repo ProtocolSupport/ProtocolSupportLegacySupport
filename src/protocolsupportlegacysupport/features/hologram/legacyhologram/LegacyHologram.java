@@ -1,4 +1,4 @@
-package protocolsupportlegacysupport.hologram.legacyhologram;
+package protocolsupportlegacysupport.features.hologram.legacyhologram;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package protocolsupportlegacysupport.hologram.legacyhologram;
+package protocolsupportlegacysupport.features.hologram.legacyhologram;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +10,6 @@ import org.bukkit.util.Vector;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
-import protocolsupportlegacysupport.utils.Constants;
 import protocolsupportlegacysupport.utils.IdGenerator;
 import protocolsupportlegacysupport.utils.PacketUtils;
 
@@ -25,9 +24,9 @@ public class HorseLegacyHologram implements LegacyHologram {
 	@Override
 	public void spawn(Connection connection, Vector location, Optional<WrappedChatComponent> name) {
 		PacketUtils.sendPacket(connection, PacketUtils.createEntityObjectSpawnPacket(witherSkullId, EntityType.WITHER_SKULL));
-		PacketUtils.sendPacket(connection, PacketUtils.createEntityLivingSpawnPacket(horseId, Constants.HORSE_TYPE_ID));
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityLivingSpawnPacket(horseId, PacketUtils.HORSE_TYPE_ID));
 		PacketUtils.sendPacket(connection, PacketUtils.createEntityMetadataPacket(horseId, Collections.singletonList(
-			PacketUtils.createDataWatcherObject(AGE_HACK_INDEX, Constants.DW_INTEGER_SERIALIZER, AGE_HACK_VALUE)
+			PacketUtils.createDataWatcherObject(AGE_HACK_INDEX, PacketUtils.DW_INTEGER_SERIALIZER, AGE_HACK_VALUE)
 		)));
 		updateName(connection, name);
 		updateLocation(connection, location);
@@ -45,8 +44,8 @@ public class HorseLegacyHologram implements LegacyHologram {
 	@Override
 	public void updateName(Connection connection, Optional<WrappedChatComponent> name) {
 		PacketUtils.sendPacket(connection, PacketUtils.createEntityMetadataPacket(horseId, Arrays.asList(
-			PacketUtils.createDataWatcherObject(Constants.DW_BASE_NAME_INDEX, Constants.DW_OPTIONAL_CHAT_SERIALIZER, name.map(WrappedChatComponent::getHandle)),
-			PacketUtils.createDataWatcherObject(Constants.DW_BASE_NAME_VISIBLE_INDEX, Constants.DW_BOOLEAN_SERIALIZER, Boolean.TRUE)
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_BASE_NAME_INDEX, PacketUtils.DW_OPTIONAL_CHAT_SERIALIZER, name.map(WrappedChatComponent::getHandle)),
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_BASE_NAME_VISIBLE_INDEX, PacketUtils.DW_BOOLEAN_SERIALIZER, Boolean.TRUE)
 		)));
 	}
 

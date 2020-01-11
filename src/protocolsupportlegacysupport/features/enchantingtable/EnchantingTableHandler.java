@@ -1,10 +1,11 @@
-package protocolsupportlegacysupport.enchantingtable;
+package protocolsupportlegacysupport.features.enchantingtable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -13,15 +14,22 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
+import protocolsupportlegacysupport.features.AbstractFeature;
 
-public class EnchantingTableHandler implements Listener {
+public class EnchantingTableHandler extends AbstractFeature<Void> implements Listener {
 
-	public void start() {
+	@Override
+	protected void enable0(Void config) {
 		Bukkit.getPluginManager().registerEvents(this, ProtocolSupportLegacySupport.getInstance());
 	}
 
+	@Override
+	protected void disable0() {
+		HandlerList.unregisterAll(this);
+	}
+
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void onInvOpen(InventoryClickEvent event) {
+	protected void onInvOpen(InventoryClickEvent event) {
 		Bukkit.getScheduler().scheduleSyncDelayedTask(ProtocolSupportLegacySupport.getInstance(), () -> {
 			Inventory topinv = event.getWhoClicked().getOpenInventory().getTopInventory();
 			if (!(topinv instanceof EnchantingInventory)) {
@@ -33,7 +41,7 @@ public class EnchantingTableHandler implements Listener {
 			ItemStack[] contents = player.getInventory().getStorageContents();
 			for (int i = 0; i < contents.length; i++) {
 				ItemStack itemstack = contents[i];
-				if (itemstack != null && itemstack.getType() == Material.LAPIS_LAZULI) {
+				if ((itemstack != null) && (itemstack.getType() == Material.LAPIS_LAZULI)) {
 					int lapisPlayerAmount = Math.min(itemstack.getAmount(), Material.LAPIS_LAZULI.getMaxStackSize() - lapisEnchAmount);
 					itemstack.setAmount(itemstack.getAmount() - lapisPlayerAmount);
 					if (itemstack.getAmount() == 0) {
@@ -54,7 +62,7 @@ public class EnchantingTableHandler implements Listener {
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void onInvClose(InventoryCloseEvent event) {
+	protected void onInvClose(InventoryCloseEvent event) {
 		Inventory topinv = event.getView().getTopInventory();
 		if (!(topinv instanceof EnchantingInventory)) {
 			return;

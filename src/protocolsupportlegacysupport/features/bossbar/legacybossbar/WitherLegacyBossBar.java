@@ -1,4 +1,4 @@
-package protocolsupportlegacysupport.bossbar.legacybossbar;
+package protocolsupportlegacysupport.features.bossbar.legacybossbar;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +11,6 @@ import org.bukkit.util.Vector;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
-import protocolsupportlegacysupport.utils.Constants;
 import protocolsupportlegacysupport.utils.IdGenerator;
 import protocolsupportlegacysupport.utils.PacketUtils;
 
@@ -32,13 +31,13 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 		lastPercent = percent;
 		lastPlayerLocation = player.getLocation();
 
-		PacketUtils.sendPacket(connection, PacketUtils.createEntityLivingSpawnPacket(id, Constants.WITHER_TYPE_ID));
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityLivingSpawnPacket(id, PacketUtils.WITHER_TYPE_ID));
 		PacketUtils.sendPacket(connection, PacketUtils.createEntityMetadataPacket(id, Arrays.asList(
-			PacketUtils.createDataWatcherObject(Constants.DW_BASE_FLAGS_INDEX, Constants.DW_BYTE_SERIALIZER, WITHER_BASE_FLAGS_VALUE),
-			PacketUtils.createDataWatcherObject(Constants.DW_BASE_NAME_INDEX, Constants.DW_OPTIONAL_CHAT_SERIALIZER, Optional.of(lastName.getHandle())),
-			PacketUtils.createDataWatcherObject(Constants.DW_BASE_NAME_VISIBLE_INDEX, Constants.DW_BOOLEAN_SERIALIZER, Boolean.TRUE),
-			PacketUtils.createDataWatcherObject(Constants.DW_LIVING_HEALTH_INDEX, Constants.DW_FLOAT_SERIALIZER, Float.valueOf(lastPercent * 3F)),
-			PacketUtils.createDataWatcherObject(Constants.DW_WITHER_INVULNERABLE_TIME_INDEX, Constants.DW_INTEGER_SERIALIZER, WITHER_INVULNERABLE_TIME)
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_BASE_FLAGS_INDEX, PacketUtils.DW_BYTE_SERIALIZER, WITHER_BASE_FLAGS_VALUE),
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_BASE_NAME_INDEX, PacketUtils.DW_OPTIONAL_CHAT_SERIALIZER, Optional.of(lastName.getHandle())),
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_BASE_NAME_VISIBLE_INDEX, PacketUtils.DW_BOOLEAN_SERIALIZER, Boolean.TRUE),
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_LIVING_HEALTH_INDEX, PacketUtils.DW_FLOAT_SERIALIZER, Float.valueOf(lastPercent * 3F)),
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_WITHER_INVULNERABLE_TIME_INDEX, PacketUtils.DW_INTEGER_SERIALIZER, WITHER_INVULNERABLE_TIME)
 		)));
 		updateEntityLocation(connection);
 	}
@@ -74,7 +73,7 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 		lastPercent = percent;
 
 		PacketUtils.sendPacket(connection, PacketUtils.createEntityMetadataPacket(id, Collections.singletonList(
-			PacketUtils.createDataWatcherObject(Constants.DW_LIVING_HEALTH_INDEX, Constants.DW_FLOAT_SERIALIZER, Float.valueOf(lastPercent * 3F))
+			PacketUtils.createDataWatcherObject(PacketUtils.DW_LIVING_HEALTH_INDEX, PacketUtils.DW_FLOAT_SERIALIZER, Float.valueOf(lastPercent * 3F))
 		)));
 	}
 

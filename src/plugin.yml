@@ -1,7 +1,0 @@
-name: ProtocolSupportLegacySupport
-main: protocolsupportlegacysupport.ProtocolSupportLegacySupport
-version: 1.2
-api-version: 1.15
-author: _Shevchik_
-load: STARTUP
-depend: [ProtocolSupport, ProtocolLib]

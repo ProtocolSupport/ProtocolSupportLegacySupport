@@ -1,4 +1,4 @@
-package protocolsupportlegacysupport.hologram.armorstand;
+package protocolsupportlegacysupport.features.hologram.armorstand;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,8 +10,8 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
 import protocolsupport.api.Connection;
-import protocolsupportlegacysupport.hologram.legacyhologram.LegacyHologram;
-import protocolsupportlegacysupport.utils.Constants;
+import protocolsupportlegacysupport.features.hologram.legacyhologram.LegacyHologram;
+import protocolsupportlegacysupport.utils.PacketUtils;
 
 public class ArmorStandData {
 
@@ -56,23 +56,23 @@ public class ArmorStandData {
 
 	@SuppressWarnings("unchecked")
 	private Optional<WrappedChatComponent> getName() {
-		return ((Optional<Object>) meta.get(Constants.DW_BASE_NAME_INDEX)).map(WrappedChatComponent::fromHandle);
+		return ((Optional<Object>) meta.get(PacketUtils.DW_BASE_NAME_INDEX)).map(WrappedChatComponent::fromHandle);
 	}
 
 	private boolean isHologram() {
-		Object basicData = meta.get(Constants.DW_BASE_FLAGS_INDEX);
+		Object basicData = meta.get(PacketUtils.DW_BASE_FLAGS_INDEX);
 		if (basicData == null) {
 			return false;
 		}
 		int basicDataI = ((Number) basicData).intValue();
-		if (!isOffsetSet(basicDataI, Constants.DW_BASE_FLAGS_INVISIBLE_OFFSET)) {
+		if (!isOffsetSet(basicDataI, PacketUtils.DW_BASE_FLAGS_INVISIBLE_OFFSET)) {
 			return false;
 		}
-		Object armorStandData = meta.get(Constants.DW_ARMORSTANDDATA_INDEX);
+		Object armorStandData = meta.get(PacketUtils.DW_ARMORSTANDDATA_INDEX);
 		if (armorStandData == null) {
 			return false;
 		}
-		return isOffsetSet(((Number) armorStandData).intValue(), Constants.DW_ARMORSTANDDATA_MARKER_OFFSET);
+		return isOffsetSet(((Number) armorStandData).intValue(), PacketUtils.DW_ARMORSTANDDATA_MARKER_OFFSET);
 	}
 
 	public void destroy() {
