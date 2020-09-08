@@ -2,6 +2,7 @@ package protocolsupportlegacysupport;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
+import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,6 +15,7 @@ import protocolsupportlegacysupport.features.bossbar.BossBarHandler;
 import protocolsupportlegacysupport.features.brewingstandfuel.BrewingStandFuelHandler;
 import protocolsupportlegacysupport.features.enchantingtable.EnchantingTableHandler;
 import protocolsupportlegacysupport.features.hologram.HologramHandler;
+import protocolsupportlegacysupport.utils.EntityIdGenerator;
 
 public class ProtocolSupportLegacySupport extends JavaPlugin {
 
@@ -52,6 +54,7 @@ public class ProtocolSupportLegacySupport extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
+		getLogger().log(Level.INFO, "Using entity id generator " + EntityIdGenerator.INSTANCE.getClass().getSimpleName());
 		configuration.reload();
 		enableHandlers();
 	}

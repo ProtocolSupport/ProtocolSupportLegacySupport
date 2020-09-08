@@ -10,7 +10,7 @@ import org.bukkit.util.Vector;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
-import protocolsupportlegacysupport.utils.IdGenerator;
+import protocolsupportlegacysupport.utils.EntityIdGenerator;
 import protocolsupportlegacysupport.utils.PacketUtils;
 
 //Not invisible, but entities on wither skulls stay still, so text is somewhat readable when not multiline
@@ -19,7 +19,7 @@ public class SlimeLegacyHologram implements LegacyHologram {
 	private static final Integer SLIME_SIZE = Integer.valueOf(1);
 
 	private final int slimeId;
-	private final int witherSkullId = IdGenerator.generateId();
+	private final int witherSkullId = EntityIdGenerator.INSTANCE.nextId();
 
 	public SlimeLegacyHologram(int entityId) {
 		this.slimeId = entityId;

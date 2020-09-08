@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
-import protocolsupportlegacysupport.utils.IdGenerator;
+import protocolsupportlegacysupport.utils.EntityIdGenerator;
 import protocolsupportlegacysupport.utils.PacketUtils;
 
 public class WitherLegacyBossBar implements LegacyBossBar {
@@ -19,7 +19,7 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 	private static final Byte WITHER_BASE_FLAGS_VALUE = Byte.valueOf((byte) 0x20);
 	private static final Integer WITHER_INVULNERABLE_TIME = Integer.valueOf(881);
 
-	private final int id = IdGenerator.generateId();
+	private final int id = EntityIdGenerator.INSTANCE.nextId();
 
 	private Location lastPlayerLocation;
 	private WrappedChatComponent lastName = WrappedChatComponent.fromText("");

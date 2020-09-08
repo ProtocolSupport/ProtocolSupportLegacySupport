@@ -10,7 +10,7 @@ import org.bukkit.util.Vector;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import protocolsupport.api.Connection;
-import protocolsupportlegacysupport.utils.IdGenerator;
+import protocolsupportlegacysupport.utils.EntityIdGenerator;
 import protocolsupportlegacysupport.utils.PacketUtils;
 
 public class HorseLegacyHologram implements LegacyHologram {
@@ -19,7 +19,7 @@ public class HorseLegacyHologram implements LegacyHologram {
 	private static final Integer AGE_HACK_VALUE = Integer.valueOf(-1700000);
 
 	private final int horseId;
-	private final int witherSkullId = IdGenerator.generateId();
+	private final int witherSkullId = EntityIdGenerator.INSTANCE.nextId();
 
 	public HorseLegacyHologram(int entityId) {
 		this.horseId = entityId;
