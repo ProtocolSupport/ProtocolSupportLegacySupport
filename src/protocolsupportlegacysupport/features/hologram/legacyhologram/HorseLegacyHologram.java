@@ -18,8 +18,12 @@ public class HorseLegacyHologram implements LegacyHologram {
 	private static final Integer AGE_HACK_INDEX = 30;
 	private static final Integer AGE_HACK_VALUE = Integer.valueOf(-1700000);
 
-	private final int horseId = IdGenerator.generateId();
+	private final int horseId;
 	private final int witherSkullId = IdGenerator.generateId();
+
+	public HorseLegacyHologram(int entityId) {
+		this.horseId = entityId;
+	}
 
 	@Override
 	public void spawn(Connection connection, Vector location, Optional<WrappedChatComponent> name) {

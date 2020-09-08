@@ -16,14 +16,16 @@ import protocolsupportlegacysupport.utils.PacketUtils;
 public class ArmorStandData {
 
 	private final Connection connection;
+	private final int entityId;
 
 	private Vector location;
 	private final HashMap<Integer, Object> meta = new HashMap<>();
 
 	private LegacyHologram hologram;
 
-	public ArmorStandData(Connection connection, Vector location) {
+	public ArmorStandData(Connection connection, int entityId, Vector location) {
 		this.connection = connection;
+		this.entityId = entityId;
 		this.location = location.clone();
 	}
 
@@ -40,7 +42,7 @@ public class ArmorStandData {
 		}
 		if (hologram == null) {
 			if (isHologram()) {
-				hologram = LegacyHologram.create(connection.getVersion());
+				hologram = LegacyHologram.create(connection.getVersion(), entityId);
 				hologram.spawn(connection, location.clone(), getName());
 			}
 		} else {

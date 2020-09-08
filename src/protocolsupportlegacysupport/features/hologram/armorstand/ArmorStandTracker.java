@@ -16,7 +16,7 @@ public class ArmorStandTracker {
 	}
 
 	public void add(Connection connection, int entityId, Vector location) {
-		collection.put(entityId, new ArmorStandData(connection, location));
+		collection.put(entityId, new ArmorStandData(connection, entityId, location));
 	}
 
 	public void destroy(int entityId) {

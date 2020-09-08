@@ -18,8 +18,12 @@ public class SlimeLegacyHologram implements LegacyHologram {
 
 	private static final Integer SLIME_SIZE = Integer.valueOf(1);
 
-	private final int slimeId = IdGenerator.generateId();
+	private final int slimeId;
 	private final int witherSkullId = IdGenerator.generateId();
+
+	public SlimeLegacyHologram(int entityId) {
+		this.slimeId = entityId;
+	}
 
 	@Override
 	public void spawn(Connection connection, Vector location, Optional<WrappedChatComponent> name) {
