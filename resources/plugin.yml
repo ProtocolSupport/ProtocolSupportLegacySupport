@@ -1,13 +1,15 @@
 name: ProtocolSupportLegacySupport
 main: protocolsupportlegacysupport.ProtocolSupportLegacySupport
-version: 1.16.2-1
+version: ${version}
 api-version: 1.16
-author: _Shevchik_
 load: STARTUP
 depend: [ProtocolSupport, ProtocolLib]
+
 commands:
   protocolsupportlegacysupport:
     description: All ProtocolSupportLegacySupport commands
     aliases:
     - psls
     usage: '/protocolsupportlegacysupport reload'
+
+author: _Shevchik_

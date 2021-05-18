@@ -8,7 +8,7 @@ defaultTasks 'build'
 
 
 group 'protocolsupport'
-version '1.16.2-1'
+version '1.16.5-1'
 
 
 import java.nio.file.Path
@@ -46,9 +46,9 @@ repositories {
 }
 
 dependencies {
-	compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.15.1-R0.1-SNAPSHOT'
+	compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.16.5-R0.1-SNAPSHOT'
 	compileOnly group: 'com.comphenix.protocol', name: 'ProtocolLib', version: '4.5.0'
-	compileOnly group: 'com.github.ProtocolSupport', name: 'ProtocolSupport', version: '3ac7e482ca'
+	compileOnly group: 'com.github.ProtocolSupport', name: 'ProtocolSupport', version: '6628267842'
 }
 
 compileJava {
@@ -56,12 +56,17 @@ compileJava {
 	options.incremental = false
 }
 
+processResources {
+    filesMatching('plugin.yml') {
+        expand 'version': project.version
+    }
+}
 
 shadowJar {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
 	from sourceSets.main.java.srcDirs
 	from 'LICENSE'
-
-	archiveName = jar.archiveName
 
 	minimize()
 }
