@@ -61,7 +61,7 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 					return false;
 				});
 				registerHandler(PacketType.Play.Server.SPAWN_ENTITY_LIVING, (connection, packet) -> {
-					if (packet.getIntegers().read(1) != PacketUtils.ARMORSTAND_LIVING_TYPE_ID) {
+					if (packet.getIntegers().read(1) != PacketUtils.ARMORSTAND_TYPE_ID) {
 						return false;
 					}
 					int entityId = packet.getIntegers().read(0);
@@ -76,10 +76,7 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 					return true;
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_DESTROY, (connection, packet) -> {
-					int[] entityIds = packet.getIntegerArrays().read(0);
-					for (int entityId : entityIds) {
-						getTracker(connection).destroy(entityId);
-					}
+					getTracker(connection).destroy(packet.getIntegers().read(0));
 					return false;
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_METADATA, (connection, packet) -> {

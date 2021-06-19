@@ -82,7 +82,7 @@ public class PacketUtils {
 	public static final int SLIME_TYPE_ID = MaterialAPI.getEntityLivingTypeNetworkId(EntityType.SLIME);
 	public static final int HORSE_TYPE_ID = MaterialAPI.getEntityLivingTypeNetworkId(EntityType.HORSE);
 	public static final int WITHER_TYPE_ID = MaterialAPI.getEntityLivingTypeNetworkId(EntityType.WITHER);
-	public static final int ARMORSTAND_LIVING_TYPE_ID = MaterialAPI.getEntityLivingTypeNetworkId(EntityType.ARMOR_STAND);
+	public static final int ARMORSTAND_TYPE_ID = MaterialAPI.getEntityLivingTypeNetworkId(EntityType.ARMOR_STAND);
 
 	public static final Serializer DW_FLOAT_SERIALIZER = Registry.get(Float.class, false);
 	public static final Serializer DW_BYTE_SERIALIZER = Registry.get(Byte.class, false);
