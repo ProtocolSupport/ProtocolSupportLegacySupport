@@ -1,9 +1,9 @@
 name: ProtocolSupportLegacySupport
 main: protocolsupportlegacysupport.ProtocolSupportLegacySupport
-version: ${version}
-api-version: 1.16
-load: STARTUP
+api-version: 1.17
 depend: [ProtocolSupport, ProtocolLib]
+load: STARTUP
+version: ${version}
 
 commands:
   protocolsupportlegacysupport:

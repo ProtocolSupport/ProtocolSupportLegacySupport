@@ -24,7 +24,7 @@ public interface EntityIdGenerator {
 		private final AtomicInteger entityCounter;
 
 		public ServerEntityCounterReflectionEntityIdGenerator() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-			Field field = MinecraftReflection.getEntityClass().getDeclaredField("entityCount");
+			Field field = MinecraftReflection.getEntityClass().getDeclaredField("b");
 			field.setAccessible(true);
 			entityCounter = (AtomicInteger) field.get(null);
 		}

@@ -1,5 +1,5 @@
 plugins {
-	id 'com.github.johnrengelman.shadow' version '5.0.0'
+	id 'com.github.johnrengelman.shadow' version '7.0.0'
 	id 'java'
 }
 
@@ -8,7 +8,7 @@ defaultTasks 'build'
 
 
 group 'protocolsupport'
-version '1.16.5-1'
+version '1.17-1'
 
 
 import java.nio.file.Path
@@ -18,7 +18,7 @@ import java.nio.file.Files
 Path projectDirectoryPath = projectDir.toPath().toAbsolutePath()
 
 
-sourceCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_16
 
 sourceSets {
 	main {
@@ -33,7 +33,6 @@ sourceSets {
 
 repositories {
 	mavenCentral()
-	jcenter()
 	maven {
 		url 'https://hub.spigotmc.org/nexus/content/repositories/public/'
 	}
@@ -45,16 +44,27 @@ repositories {
 	}
 }
 
+configurations {
+	runtimeDependencies
+	compileOnly {
+		extendsFrom runtimeDependencies
+	}
+	testImplementation {
+	    extendsFrom runtimeDependencies
+	}
+}
+
 dependencies {
-	compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.16.5-R0.1-SNAPSHOT'
-	compileOnly group: 'com.comphenix.protocol', name: 'ProtocolLib', version: '4.5.0'
-	compileOnly group: 'com.github.ProtocolSupport', name: 'ProtocolSupport', version: '6628267842'
+	runtimeDependencies group: 'org.spigotmc', name: 'spigot-api', version: '1.17-R0.1-SNAPSHOT'
+	runtimeDependencies group: 'com.comphenix.protocol', name: 'ProtocolLib', version: '4.5.0'
+	runtimeDependencies group: 'com.github.ProtocolSupport', name: 'ProtocolSupport', version: '6628267842'
 }
 
 compileJava {
 	options.encoding = 'UTF-8'
 	options.incremental = false
 }
+
 
 processResources {
     filesMatching('plugin.yml') {
@@ -65,6 +75,8 @@ processResources {
 shadowJar {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
+	archiveClassifier = ''
+
 	from sourceSets.main.java.srcDirs
 	from 'LICENSE'
 
@@ -73,11 +85,11 @@ shadowJar {
 
 
 task copyFinalJarToTarget(type: DefaultTask) {doLast{
-	Path targetJarDirectory = projectDirectoryPath.resolve("target")
+	Path targetJarDirectory = projectDirectoryPath.resolve('target')
 	Files.createDirectories(targetJarDirectory)
 	Files.copy(
-		shadowJar.archivePath.toPath().toAbsolutePath(),
-		targetJarDirectory.resolve(shadowJar.baseName + '.jar'),
+		shadowJar.archiveFile.get().getAsFile().toPath().toAbsolutePath(),
+		targetJarDirectory.resolve(shadowJar.archiveBaseName.get() + '.jar'),
 		java.nio.file.StandardCopyOption.REPLACE_EXISTING
 	)
 }}

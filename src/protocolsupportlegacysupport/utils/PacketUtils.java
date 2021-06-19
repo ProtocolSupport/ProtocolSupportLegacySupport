@@ -50,9 +50,9 @@ public class PacketUtils {
 		return metadata;
 	}
 
-	public static PacketContainer createEntityDestroyPacket(int... entityIds) {
+	public static PacketContainer createEntityDestroyPacket(int entityId) {
 		PacketContainer destroy = createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		destroy.getIntegerArrays().write(0, entityIds);
+		destroy.getIntegers().write(0, entityId);
 		return destroy;
 	}
 
@@ -93,10 +93,10 @@ public class PacketUtils {
 	public static final int DW_BASE_FLAGS_INVISIBLE_OFFSET = 0x20;
 	public static final int DW_BASE_NAME_INDEX = 2;
 	public static final int DW_BASE_NAME_VISIBLE_INDEX = 3;
-	public static final int DW_LIVING_HEALTH_INDEX = 8;
-	public static final int DW_ARMORSTANDDATA_INDEX = 14;
+	public static final int DW_LIVING_HEALTH_INDEX = 9;
+	public static final int DW_ARMORSTANDDATA_INDEX = 15;
 	public static final int DW_ARMORSTANDDATA_MARKER_OFFSET = 0x10;
-	public static final int DW_WITHER_INVULNERABLE_TIME_INDEX = 18;
-	public static final int DW_SLINE_SIZE_INDEX = 15;
+	public static final int DW_WITHER_INVULNERABLE_TIME_INDEX = 19;
+	public static final int DW_SLINE_SIZE_INDEX = 16;
 
 }
