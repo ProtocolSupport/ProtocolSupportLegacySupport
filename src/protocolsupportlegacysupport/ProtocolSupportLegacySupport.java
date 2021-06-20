@@ -29,7 +29,7 @@ public class ProtocolSupportLegacySupport extends JavaPlugin {
 		instance = this;
 	}
 
-	private static final BigInteger requiredAPIversion = BigInteger.ONE;
+	private static final BigInteger requiredAPIversion = BigInteger.valueOf(15);
 
 	private final FeaturesConfiguration configuration = new FeaturesConfiguration();
 
