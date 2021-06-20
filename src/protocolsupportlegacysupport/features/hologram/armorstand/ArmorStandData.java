@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.bukkit.util.Vector;
 
+import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
@@ -19,7 +20,7 @@ public class ArmorStandData {
 	private final int entityId;
 
 	private Vector location;
-	private final HashMap<Integer, Object> meta = new HashMap<>();
+	private HashMap<Integer, Object> meta = new HashMap<>();
 
 	private LegacyHologram hologram;
 
@@ -29,24 +30,30 @@ public class ArmorStandData {
 		this.location = location.clone();
 	}
 
-	public void setLocation(Vector vector) {
+	public void setLocation(Collection<PacketContainer> packets, Vector vector) {
 		this.location = vector.clone();
 		if (hologram != null) {
-			hologram.updateLocation(connection, location.clone());
+			hologram.updateLocation(packets, location.clone());
 		}
 	}
 
-	public void addMeta(Collection<WrappedWatchableObject> objects) {
+	public void addMeta(Collection<PacketContainer> packets, Collection<WrappedWatchableObject> objects) {
 		for (WrappedWatchableObject obj : objects) {
 			meta.put(obj.getIndex(), obj.getRawValue());
 		}
 		if (hologram == null) {
 			if (isHologram()) {
 				hologram = LegacyHologram.create(connection.getVersion(), entityId);
-				hologram.spawn(connection, location.clone(), getName());
+				hologram.spawn(packets, location.clone(), getName());
 			}
 		} else {
-			hologram.updateName(connection, getName());
+			hologram.updateName(packets, getName());
+		}
+	}
+
+	public void destroy(Collection<PacketContainer> packets) {
+		if (hologram != null) {
+			hologram.despawn(packets);
 		}
 	}
 
@@ -75,15 +82,6 @@ public class ArmorStandData {
 			return false;
 		}
 		return isOffsetSet(((Number) armorStandData).intValue(), PacketUtils.DW_ARMORSTANDDATA_MARKER_OFFSET);
-	}
-
-	public void destroy() {
-		if (hologram != null) {
-			hologram.despawn(connection);
-			hologram = null;
-		}
-		location = null;
-		meta.clear();
 	}
 
 }

@@ -1,5 +1,9 @@
 package protocolsupportlegacysupport.features.hologram;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -9,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 
 import protocolsupport.api.Connection;
@@ -20,10 +25,12 @@ import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
 import protocolsupportlegacysupport.features.AbstractFeature;
 import protocolsupportlegacysupport.features.hologram.armorstand.ArmorStandData;
 import protocolsupportlegacysupport.features.hologram.armorstand.ArmorStandTracker;
-import protocolsupportlegacysupport.utils.ClientBoundPacketListener;
 import protocolsupportlegacysupport.utils.PacketUtils;
+import protocolsupportlegacysupport.utils.SimpleClientBoundPacketListener;
 
 public class HologramHandler extends AbstractFeature<Void> implements Listener {
+
+	public static final int LISTENER_PRIORITY = Integer.MIN_VALUE + Short.MAX_VALUE;
 
 	@Override
 	protected void enable0(Void config) {
@@ -37,7 +44,11 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 		for (Connection connection : ProtocolSupportAPI.getConnections()) {
 			ArmorStandTracker tracker = connection.removeMetadata(metadata_key);
 			if (tracker != null) {
-				tracker.destroyAll();
+				List<PacketContainer> packets = new ArrayList<>();
+				tracker.destroyAll(packets);
+				for (PacketContainer packet : packets) {
+					PacketUtils.sendPacket(connection, packet);
+				}
 			}
 		}
 	}
@@ -50,64 +61,68 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 	}
 
 	private void initConnection(Connection connection) {
-		connection.addMetadata(metadata_key, new ArmorStandTracker());
-		connection.addPacketListener(new ClientBoundPacketListener(connection) {
+		connection.addMetadata(metadata_key, new ArmorStandTracker(connection));
+		connection.addPacketListener(new SimpleClientBoundPacketListener(connection) {
 			{
+				registerHandler(PacketType.Play.Server.LOGIN, (connection, packet) -> {
+					getTracker(connection).destroyAll(null);
+					return null;
+				});
 				registerHandler(PacketType.Play.Server.RESPAWN, (connection, packet) -> {
-					ArmorStandTracker tracker = getTracker(connection);
-					if (tracker != null) {
-						tracker.destroyAll();
-					}
-					return false;
+					getTracker(connection).destroyAll(null);
+					return null;
 				});
 				registerHandler(PacketType.Play.Server.SPAWN_ENTITY_LIVING, (connection, packet) -> {
 					if (packet.getIntegers().read(1) != PacketUtils.ARMORSTAND_TYPE_ID) {
-						return false;
+						return null;
 					}
-					int entityId = packet.getIntegers().read(0);
-					initArmorStand(connection, entityId, packet.getDoubles());
-					return true;
+					return initArmorStand(getTracker(connection), packet.getIntegers().read(0), packet.getDoubles());
 				});
 				registerHandler(PacketType.Play.Server.SPAWN_ENTITY, (connection, packet) -> {
 					if (packet.getEntityTypeModifier().read(0) != EntityType.ARMOR_STAND) {
-						return false;
+						return null;
 					}
-					initArmorStand(connection, packet.getIntegers().read(0), packet.getDoubles());
-					return true;
+					return initArmorStand(getTracker(connection), packet.getIntegers().read(0), packet.getDoubles());
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_DESTROY, (connection, packet) -> {
-					getTracker(connection).destroy(packet.getIntegers().read(0));
-					return false;
+					int entityId = packet.getIntegers().read(0);
+					ArmorStandTracker tracker = getTracker(connection);
+					if (!tracker.has(entityId)) {
+						return null;
+					}
+					List<PacketContainer> packets = new ArrayList<>();
+					getTracker(connection).destroy(packets, entityId);
+					return packets;
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_METADATA, (connection, packet) -> {
 					ArmorStandData data = getArmorStand(connection, packet.getIntegers().read(0));
 					if (data == null) {
-						return false;
+						return null;
 					}
-					data.addMeta(packet.getWatchableCollectionModifier().read(0));
-					return true;
+					List<PacketContainer> packets = new ArrayList<>();
+					data.addMeta(packets, packet.getWatchableCollectionModifier().read(0));
+					return packets;
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_TELEPORT, (connection, packet) -> {
 					ArmorStandData data = getArmorStand(connection, packet.getIntegers().read(0));
 					if (data == null) {
-						return false;
+						return null;
 					}
 					StructureModifier<Double> doubles = packet.getDoubles();
-					data.setLocation(new Vector(doubles.read(0), doubles.read(1), doubles.read(2)));
-					return true;
+					List<PacketContainer> packets = new ArrayList<>();
+					data.setLocation(packets, new Vector(doubles.read(0), doubles.read(1), doubles.read(2)));
+					return packets;
 				});
 			}
 			@Override
 			public void onPacketSending(PacketEvent event) {
-				if (
-					(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
-					connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_7_10)
-				) {
+				ProtocolVersion verison = connection.getVersion();
+				if ((verison.getProtocolType() != ProtocolType.PC) || verison.isAfterOrEq(ProtocolVersion.MINECRAFT_1_8)) {
 					return;
 				}
 				super.onPacketSending(event);
 			}
-		});
+		}, LISTENER_PRIORITY);
 	}
 
 	protected ArmorStandTracker getTracker(Connection connection) {
@@ -118,15 +133,19 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 		return getTracker(connection).get(entityId);
 	}
 
-	protected void initArmorStand(Connection connection, int entityId, StructureModifier<Double> doubles) {
-		ArmorStandData existing = getArmorStand(connection, entityId);
-		if (existing != null) {
-			existing.destroy();
+	protected List<PacketContainer> initArmorStand(ArmorStandTracker tracker, int entityId, StructureModifier<Double> doubles) {
+		List<PacketContainer> packets;
+		if (tracker.has(entityId)) {
+			packets = new ArrayList<>();
+			tracker.destroy(packets, entityId);
+		} else {
+			packets = Collections.emptyList();
 		}
 		double x = doubles.read(0);
 		double y = doubles.read(1);
 		double z = doubles.read(2);
-		getTracker(connection).add(connection, entityId, new Vector(x, y, z));
+		tracker.add(entityId, new Vector(x, y, z));
+		return packets;
 	}
 
 }
