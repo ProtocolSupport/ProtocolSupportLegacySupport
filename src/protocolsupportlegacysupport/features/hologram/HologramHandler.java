@@ -85,13 +85,20 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 					return initArmorStand(getTracker(connection), packet.getIntegers().read(0), packet.getDoubles());
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_DESTROY, (connection, packet) -> {
-					int entityId = packet.getIntegers().read(0);
 					ArmorStandTracker tracker = getTracker(connection);
-					if (!tracker.has(entityId)) {
-						return null;
-					}
+					int[] entityIds = packet.getIntegerArrays().read(0);
 					List<PacketContainer> packets = new ArrayList<>();
-					getTracker(connection).destroy(packets, entityId);
+					List<Integer> normalEntityIds = new ArrayList<>();
+					for (int entityId : entityIds) {
+						if (tracker.has(entityId)) {
+							getTracker(connection).destroy(packets, entityId);
+						} else {
+							normalEntityIds.add(entityId);
+						}
+					}
+					if (!normalEntityIds.isEmpty()) {
+						packets.add(PacketUtils.createEntityDestroyPacket(normalEntityIds.stream().mapToInt(Integer::intValue).toArray()));
+					}
 					return packets;
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_METADATA, (connection, packet) -> {

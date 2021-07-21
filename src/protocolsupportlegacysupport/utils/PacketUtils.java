@@ -50,9 +50,9 @@ public class PacketUtils {
 		return metadata;
 	}
 
-	public static PacketContainer createEntityDestroyPacket(int entityId) {
+	public static PacketContainer createEntityDestroyPacket(int... entityIds) {
 		PacketContainer destroy = createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		destroy.getIntegers().write(0, entityId);
+		destroy.getIntegerArrays().write(0, entityIds);
 		return destroy;
 	}
 

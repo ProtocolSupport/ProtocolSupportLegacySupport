@@ -1,5 +1,8 @@
 package protocolsupportlegacysupport.features.bossbar;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,6 +13,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.reflect.StructureModifier;
+import com.comphenix.protocol.utility.MinecraftReflection;
 
 import protocolsupport.api.Connection;
 import protocolsupport.api.Connection.PacketListener;
@@ -20,8 +25,11 @@ import protocolsupport.api.events.ConnectionOpenEvent;
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
 import protocolsupportlegacysupport.features.AbstractFeature;
 import protocolsupportlegacysupport.features.bossbar.legacybossbar.LegacyBossBar;
+import protocolsupportlegacysupport.utils.ObjectStucture;
 
 public class BossBarHandler extends AbstractFeature<Void> implements Listener {
+
+	public static final int LISTENER_PRIORITY = Integer.MIN_VALUE + Short.MAX_VALUE;
 
 	private BukkitTask task;
 
@@ -64,55 +72,89 @@ public class BossBarHandler extends AbstractFeature<Void> implements Listener {
 	}
 
 	private void initConnection(Connection connection) {
-		connection.addPacketListener(new PacketListener() {
-			@Override
-			public void onPacketSending(PacketEvent event) {
-				if (
-					(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
-					connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_8)
-				) {
-					return;
+		connection.addPacketListener(new BossBarPacketListener(connection), LISTENER_PRIORITY);
+	}
+
+	protected static class BossBarPacketListener extends PacketListener {
+
+		protected final Class<?> bossbarActionClass = MinecraftReflection.getMinecraftClass("network.protocol.game.PacketPlayOutBoss$Action");
+		protected final Map<Class<?>, Map.Entry<BossBarActionType, StructureModifier<Object>>> bossbarActionModifiers = new HashMap<>();
+
+		protected void registerActionModifier(BossBarActionType type, String classSuffix) {
+			Class<?> clazz = MinecraftReflection.getMinecraftClass("network.protocol.game.PacketPlayOutBoss$" + classSuffix);
+			bossbarActionModifiers.put(clazz, Map.entry(type, new StructureModifier<>(clazz, Object.class, false, true)));
+		}
+
+		protected final Connection connection;
+
+		public BossBarPacketListener(Connection connection) {
+			this.connection = connection;
+			this.registerActionModifier(BossBarActionType.ADD, "a");
+			this.registerActionModifier(BossBarActionType.REMOVE, "1");
+			this.registerActionModifier(BossBarActionType.UPDATE_PERCENT, "f");
+			this.registerActionModifier(BossBarActionType.UPDATE_TEXT, "e");
+		}
+
+		@Override
+		public void onPacketSending(PacketEvent event) {
+			if (
+				(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
+				connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_8)
+			) {
+				return;
+			}
+			Player player = connection.getPlayer();
+			if (player == null) {
+				return;
+			}
+			PacketContainer packet = PacketContainer.fromPacket(event.getPacket());
+			if (packet.getType() != PacketType.Play.Server.BOSS) {
+				return;
+			}
+			Object bossbarAction = packet.getSpecificModifier(bossbarActionClass).read(0);
+			Map.Entry<BossBarActionType, StructureModifier<Object>> bossbarActionTypeEntry = bossbarActionModifiers.get(bossbarAction.getClass());
+			switch (bossbarActionTypeEntry.getKey()) {
+				case ADD: {
+					LegacyBossBar bossbar = LegacyBossBar.create(connection.getVersion());
+					ObjectStucture bossbarActionAddStructure = new ObjectStucture(bossbarAction, bossbarActionTypeEntry.getValue());
+					bossbar.spawn(
+						connection, player,
+						bossbarActionAddStructure.getChatComponents().read(0),
+						bossbarActionAddStructure.getFloat().read(0) * 100
+					);
+					connection.addMetadata(metadata_key, bossbar);
+					break;
 				}
-				Player player = connection.getPlayer();
-				if (player == null) {
-					return;
+				case REMOVE: {
+					LegacyBossBar bossbar = connection.removeMetadata(metadata_key);
+					if (bossbar != null) {
+						bossbar.despawn(connection);
+					}
+					break;
 				}
-				PacketContainer packet = PacketContainer.fromPacket(event.getPacket());
-				if (packet.getType() != PacketType.Play.Server.BOSS) {
-					return;
+				case UPDATE_PERCENT: {
+					LegacyBossBar bossbar = connection.getMetadata(metadata_key);
+					if (bossbar != null) {
+						ObjectStucture bossbarActionUpdatePercentStructure = new ObjectStucture(bossbarAction, bossbarActionTypeEntry.getValue());
+						bossbar.updatePercent(connection, player, bossbarActionUpdatePercentStructure.getFloat().read(0) * 100);
+					}
+					break;
 				}
-				int action = packet.getSpecificModifier(Enum.class).read(0).ordinal();
-				switch (action) {
-					case 0: {
-						LegacyBossBar bossbar = LegacyBossBar.create(connection.getVersion());
-						bossbar.spawn(connection, player, packet.getChatComponents().read(0), packet.getFloat().read(0) * 100);
-						connection.addMetadata(metadata_key, bossbar);
-						break;
+				case UPDATE_TEXT: {
+					LegacyBossBar bossbar = connection.getMetadata(metadata_key);
+					if (bossbar != null) {
+						ObjectStucture bossbarActionUpdateTextStructure = new ObjectStucture(bossbarAction, bossbarActionTypeEntry.getValue());
+						bossbar.updateName(connection, player, bossbarActionUpdateTextStructure.getChatComponents().read(0));
 					}
-					case 1: {
-						LegacyBossBar bossbar = connection.removeMetadata(metadata_key);
-						if (bossbar != null) {
-							bossbar.despawn(connection);
-						}
-						break;
-					}
-					case 2: {
-						LegacyBossBar bossbar = connection.getMetadata(metadata_key);
-						if (bossbar != null) {
-							bossbar.updatePercent(connection, player, packet.getFloat().read(0) * 100);
-						}
-						break;
-					}
-					case 3: {
-						LegacyBossBar bossbar = connection.getMetadata(metadata_key);
-						if (bossbar != null) {
-							bossbar.updateName(connection, player, packet.getChatComponents().read(0));
-						}
-						break;
-					}
+					break;
 				}
 			}
-		});
+		}
+
+		protected enum BossBarActionType {
+			ADD, REMOVE, UPDATE_PERCENT, UPDATE_TEXT;
+		}
+
 	}
 
 }

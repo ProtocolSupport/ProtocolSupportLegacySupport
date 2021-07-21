@@ -1,6 +1,6 @@
 plugins {
-	id 'com.github.johnrengelman.shadow' version '7.0.0'
 	id 'java'
+	id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 
@@ -8,7 +8,7 @@ defaultTasks 'build'
 
 
 group 'protocolsupport'
-version '1.17-3'
+version '1.17.1-1'
 
 
 import java.nio.file.Path
@@ -56,9 +56,9 @@ configurations {
 }
 
 dependencies {
-	runtimeDependencies group: 'com.github.ProtocolSupport', name: 'ProtocolSupport', version: '9035ec07ac'
-	runtimeDependencies group: 'org.spigotmc', name: 'spigot-api', version: '1.17-R0.1-SNAPSHOT'
-	runtimeDependencies group: 'com.comphenix.protocol', name: 'ProtocolLib', version: '4.5.0'
+	runtimeDependencies group: 'com.github.ProtocolSupport', name: 'ProtocolSupport', version: '05b7689664'
+	runtimeDependencies group: 'org.spigotmc', name: 'spigot-api', version: '1.17.1-R0.1-SNAPSHOT'
+	runtimeDependencies group: 'com.comphenix.protocol', name: 'ProtocolLib', version: '4.7.0'
 }
 
 compileJava {

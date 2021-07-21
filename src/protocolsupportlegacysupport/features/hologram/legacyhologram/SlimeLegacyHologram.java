@@ -55,8 +55,7 @@ public class SlimeLegacyHologram implements LegacyHologram {
 
 	@Override
 	public void despawn(Collection<PacketContainer> packets) {
-		packets.add(PacketUtils.createEntityDestroyPacket(slimeId));
-		packets.add(PacketUtils.createEntityDestroyPacket(witherSkullId));
+		packets.add(PacketUtils.createEntityDestroyPacket(slimeId, witherSkullId));
 	}
 
 }

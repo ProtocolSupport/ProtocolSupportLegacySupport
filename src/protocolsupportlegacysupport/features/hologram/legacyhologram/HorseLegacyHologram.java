@@ -56,8 +56,7 @@ public class HorseLegacyHologram implements LegacyHologram {
 
 	@Override
 	public void despawn(Collection<PacketContainer> packets) {
-		packets.add(PacketUtils.createEntityDestroyPacket(horseId));
-		packets.add(PacketUtils.createEntityDestroyPacket(witherSkullId));
+		packets.add(PacketUtils.createEntityDestroyPacket(horseId, witherSkullId));
 	}
 
 }
