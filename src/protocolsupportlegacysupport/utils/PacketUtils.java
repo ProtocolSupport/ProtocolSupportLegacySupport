@@ -1,5 +1,6 @@
 package protocolsupportlegacysupport.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,13 +47,13 @@ public class PacketUtils {
 	public static PacketContainer createEntityMetadataPacket(int entityId, List<WrappedWatchableObject> objects) {
 		PacketContainer metadata = createPacket(PacketType.Play.Server.ENTITY_METADATA);
 		metadata.getIntegers().write(0, entityId);
-		metadata.getWatchableCollectionModifier().write(0, objects);
+		metadata.getWatchableCollectionModifier().write(0, new ArrayList<>(objects));
 		return metadata;
 	}
 
-	public static PacketContainer createEntityDestroyPacket(int... entityIds) {
+	public static PacketContainer createEntityDestroyPacket(List<Integer> entityIds) {
 		PacketContainer destroy = createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		destroy.getIntegerArrays().write(0, entityIds);
+		destroy.getIntLists().write(0, new ArrayList<>(entityIds));
 		return destroy;
 	}
 

@@ -79,7 +79,7 @@ public class WitherLegacyBossBar implements LegacyBossBar {
 
 	@Override
 	public void despawn(Connection connection) {
-		PacketUtils.sendPacket(connection, PacketUtils.createEntityDestroyPacket(id));
+		PacketUtils.sendPacket(connection, PacketUtils.createEntityDestroyPacket(Arrays.asList(id)));
 		lastPlayerLocation = null;
 	}
 

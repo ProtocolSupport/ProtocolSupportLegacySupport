@@ -2,6 +2,7 @@ package protocolsupportlegacysupport.features.hologram;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -85,19 +86,20 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 					return initArmorStand(getTracker(connection), packet.getIntegers().read(0), packet.getDoubles());
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_DESTROY, (connection, packet) -> {
+					List<Integer> entityIds = new ArrayList<>(packet.getIntLists().read(0));
 					ArmorStandTracker tracker = getTracker(connection);
-					int[] entityIds = packet.getIntegerArrays().read(0);
 					List<PacketContainer> packets = new ArrayList<>();
-					List<Integer> normalEntityIds = new ArrayList<>();
-					for (int entityId : entityIds) {
+					Iterator<Integer> entityIdsIter = entityIds.iterator();
+					while (entityIdsIter.hasNext()) {
+						Integer entityId = entityIdsIter.next();
 						if (tracker.has(entityId)) {
-							getTracker(connection).destroy(packets, entityId);
+							tracker.destroy(packets, entityId);
 						} else {
-							normalEntityIds.add(entityId);
+							entityIdsIter.remove();
 						}
 					}
-					if (!normalEntityIds.isEmpty()) {
-						packets.add(PacketUtils.createEntityDestroyPacket(normalEntityIds.stream().mapToInt(Integer::intValue).toArray()));
+					if (!entityIds.isEmpty()) {
+						packets.add(PacketUtils.createEntityDestroyPacket(entityIds));
 					}
 					return packets;
 				});
