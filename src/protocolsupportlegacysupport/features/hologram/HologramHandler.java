@@ -94,8 +94,6 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 						Integer entityId = entityIdsIter.next();
 						if (tracker.has(entityId)) {
 							tracker.destroy(packets, entityId);
-						} else {
-							entityIdsIter.remove();
 						}
 					}
 					if (!entityIds.isEmpty()) {
