@@ -2,6 +2,7 @@ package protocolsupportlegacysupport.features.hologram;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -85,13 +86,19 @@ public class HologramHandler extends AbstractFeature<Void> implements Listener {
 					return initArmorStand(getTracker(connection), packet.getIntegers().read(0), packet.getDoubles());
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_DESTROY, (connection, packet) -> {
-					int entityId = packet.getIntegers().read(0);
+					List<Integer> entityIds = new ArrayList<>(packet.getIntLists().read(0));
 					ArmorStandTracker tracker = getTracker(connection);
-					if (!tracker.has(entityId)) {
-						return null;
-					}
 					List<PacketContainer> packets = new ArrayList<>();
-					getTracker(connection).destroy(packets, entityId);
+					Iterator<Integer> entityIdsIter = entityIds.iterator();
+					while (entityIdsIter.hasNext()) {
+						Integer entityId = entityIdsIter.next();
+						if (tracker.has(entityId)) {
+							tracker.destroy(packets, entityId);
+						}
+					}
+					if (!entityIds.isEmpty()) {
+						packets.add(PacketUtils.createEntityDestroyPacket(entityIds));
+					}
 					return packets;
 				});
 				registerHandler(PacketType.Play.Server.ENTITY_METADATA, (connection, packet) -> {
